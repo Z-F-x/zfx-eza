@@ -41,6 +41,9 @@ pub enum FileFilterFlags {
     /// Whether directories should be listed as the last items, after other
     /// types of file. Some users prefer it like this.
     ListDirsLast,
+
+    OnlyHiddenFolders,
+    OnlyHiddenFiles,
 }
 
 /// The **file filter** processes a list of files before displaying them to

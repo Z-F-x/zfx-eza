@@ -52,6 +52,8 @@ pub static ONLY_DIRS:   Arg = Arg { short: Some(b'D'), long: "only-dirs", takes_
 pub static ONLY_FILES:  Arg = Arg { short: Some(b'f'), long: "only-files", takes_value: TakesValue::Forbidden };
 pub static NO_SYMLINKS: Arg = Arg { short: None,       long: "no-symlinks", takes_value: TakesValue::Forbidden };
 pub static SHOW_SYMLINKS: Arg = Arg { short: None,     long: "show-symlinks", takes_value: TakesValue::Forbidden };
+pub static ONLY_HIDDEN_FILES: Arg = Arg { short: Some(b'C'), long: "only-hidden-files", takes_value: TakesValue::Forbidden };
+pub static ONLY_HIDDEN_FOLDERS: Arg = Arg { short: Some(b'E'), long: "only-hidden-folders", takes_value: TakesValue::Forbidden };
 const SORTS: Values = &[ "name", "Name", "size", "extension",
                          "Extension", "modified", "changed", "accessed",
                          "created", "inode", "type", "none" ];

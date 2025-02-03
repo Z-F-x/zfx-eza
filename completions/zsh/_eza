@@ -72,7 +72,9 @@ __eza() {
         {-M,--mounts}"[Show mount details (long mode only)]" \
         '*:filename:_files' \
         --smart-group"[Only show group if it has a different name from owner]" \
-        --stdin"[When piping to eza. Read file names from stdin]"
+        --stdin"[When piping to eza. Read file names from stdin]"\
+        {-C,--only-hidden-files}"[Only show hidden files]"\
+        {E,--only-hidden-folders}"[Only show hidden folders]"
 }
 
 __eza

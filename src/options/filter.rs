@@ -28,6 +28,8 @@ impl FileFilter {
             (matches.has(&flags::SHOW_SYMLINKS)?, FFF::ShowSymlinks),
             (matches.has(&flags::DIRS_LAST)?, FFF::ListDirsLast),
             (matches.has(&flags::DIRS_FIRST)?, FFF::ListDirsFirst),
+            (matches.has(&flags::ONLY_HIDDEN_FOLDERS)?, FFF::OnlyHiddenFolders),
+            (matches.has(&flags::ONLY_HIDDEN_FILES)?, FFF::OnlyHiddenFiles),
         ] {
             if *has {
                 filter_flags.push(flag.clone());
@@ -135,6 +137,41 @@ impl Default for SortField {
     }
 }
 
+// impl DotFilter {
+//     /// Determines the dot filter based on how many `--all` options were
+//     /// given: one will show dotfiles, but two will show `.` and `..` too.
+//     /// --almost-all is equivalent to --all, included for compatibility with
+//     /// `ls -A`.
+//     ///
+//     /// It also checks for the `--tree` option, because of a special case
+//     /// where `--tree --all --all` won’t work: listing the parent directory
+//     /// in tree mode would loop onto itself!
+//     ///
+//     /// `--almost-all` binds stronger than multiple `--all` as we currently do not take the order
+//     /// of arguments into account and it is the safer option (does not clash with `--tree`)
+//     pub fn deduce(matches: &MatchedFlags<'_>) -> Result<Self, OptionsError> {
+//         let all_count = matches.count(&flags::ALL);
+//         let has_almost_all = matches.has(&flags::ALMOST_ALL)?;
+//
+//         match (all_count, has_almost_all) {
+//             (0, false) => Ok(Self::JustFiles),
+//
+//             // either a single --all or at least one --almost-all is given
+//             (1, _) | (0, true) => Ok(Self::Dotfiles),
+//             // more than one --all
+//             (c, _) => {
+//                 if matches.count(&flags::TREE) > 0 {
+//                     Err(OptionsError::TreeAllAll)
+//                 } else if matches.is_strict() && c > 2 {
+//                     Err(OptionsError::Conflict(&flags::ALL, &flags::ALL))
+//                 } else {
+//                     Ok(Self::DotfilesAndDots)
+//                 }
+//             }
+//         }
+//     }
+// }
+
 impl DotFilter {
     /// Determines the dot filter based on how many `--all` options were
     /// given: one will show dotfiles, but two will show `.` and `..` too.
@@ -150,14 +187,16 @@ impl DotFilter {
     pub fn deduce(matches: &MatchedFlags<'_>) -> Result<Self, OptionsError> {
         let all_count = matches.count(&flags::ALL);
         let has_almost_all = matches.has(&flags::ALMOST_ALL)?;
+        let has_only_hidden_files = matches.has(&flags::ONLY_HIDDEN_FILES)?;
+        let has_only_hidden_folders = matches.has(&flags::ONLY_HIDDEN_FOLDERS)?;
 
-        match (all_count, has_almost_all) {
-            (0, false) => Ok(Self::JustFiles),
+        match (all_count, has_almost_all, has_only_hidden_files, has_only_hidden_folders) {
+            (0, false, false, false) => Ok(Self::JustFiles),
 
             // either a single --all or at least one --almost-all is given
-            (1, _) | (0, true) => Ok(Self::Dotfiles),
+            (1, _, false, false) | (0, true, false, false) => Ok(Self::Dotfiles),
             // more than one --all
-            (c, _) => {
+            (c, _, false, false) => {
                 if matches.count(&flags::TREE) > 0 {
                     Err(OptionsError::TreeAllAll)
                 } else if matches.is_strict() && c > 2 {
@@ -165,7 +204,10 @@ impl DotFilter {
                 } else {
                     Ok(Self::DotfilesAndDots)
                 }
-            }
+            },
+            (_, _, true, false) => Ok(Self::OnlyHiddenFiles),
+            (_, _, false, true) => Ok(Self::OnlyHiddenFolders),
+            (_, _, true, true) => Err(OptionsError::Conflict(&flags::ONLY_HIDDEN_FILES, &flags::ONLY_HIDDEN_FOLDERS)),
         }
     }
 }

@@ -1,4 +1,6 @@
 export extern "eza" [
+    --only-hiddne-files(-C)    # List only hidden files
+    --only-hidden-folders(-E)  # List only hidden directories
     --version(-v)              # Show version of eza
     --help                     # Show list of command-line options
     --oneline(-1)              # Display one entry per line
